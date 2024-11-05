@@ -194,8 +194,6 @@ For more details, refer to the [Security Guidelines](docs/security_guidelines.md
 - **[UDF Development Guide](docs/udf_development_guide.md)**: Detailed instructions and examples for writing and using UDFs.
 - **[Security Guidelines](docs/security_guidelines.md)**: Information on the security model and best practices for UDF development.
 
----
-
 **Makefile**
 ---
 
