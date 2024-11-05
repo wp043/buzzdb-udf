@@ -1,9 +1,3 @@
----
-
-**README.md**
-
----
-
 # BuzzDB with User-Defined Functions (UDFs) Support
 
 Welcome to BuzzDB enhanced with User-Defined Functions (UDFs) support. This extension allows users to write custom functions in C++, register them with the database, and use them seamlessly within SQL queries.
