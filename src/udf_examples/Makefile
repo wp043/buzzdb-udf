@@ -1,10 +1,12 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -shared -fPIC
+CXXFLAGS = -std=c++11 -shared -fPIC -I../include
 
-all: my_sum_udf.so
+UDFS = my_sum_udf.so
 
-my_sum_udf.so: my_sum_udf.cpp
-    $(CXX) $(CXXFLAGS) -o my_sum_udf.so my_sum_udf.cpp
+all: $(UDFS)
+
+%.so: %.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $<
 
 clean:
-    rm -f my_sum_udf.so
+	rm -f $(UDFS)
