@@ -3,17 +3,25 @@
 #include <unordered_map>
 #include <string>
 #include <mutex>
+#ifdef __unix__
+#include <dlfcn.h>
+#endif
+#include "../common/value.h"
+namespace buzzdb {
+namespace common {
+    class Value;
+}
+}
+#include "../catalog/catalog.h"
 
 namespace buzzdb {
 namespace execution {
 
-typedef common::Value (*UDFPointer)(const std::vector<common::Value> &args);
-
 class UDFManager {
 public:
+    typedef buzzdb::common::Value (*UDFPointer)(const std::vector<buzzdb::common::Value>& args);
     static UDFManager& GetInstance();
-
-    UDFPointer GetFunction(const std::string &name);
+    UDFPointer GetFunction(const std::string& name);
 
 private:
     UDFManager() {}

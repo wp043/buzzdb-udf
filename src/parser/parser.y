@@ -1,16 +1,18 @@
-%token CREATE FUNCTION RETURNS LIBRARY
+/* ... existing code ... */
 
-%%
-statement:
-    // ... existing statements ...
-    | create_function_stmt
+expression:
+    IDENTIFIER '(' argument_list ')'
+    {
+        // Create FunctionExpression
+        std::vector<std::unique_ptr<buzzdb::expression::AbstractExpression>> args = $3;
+        $$ = new buzzdb::expression::FunctionExpression($1, std::move(args));
+    }
+    | IDENTIFIER
+    {
+        // Assume it's a column reference
+        $$ = new buzzdb::expression::ColumnExpression($1);
+    }
+    | /* other expressions */
     ;
 
-create_function_stmt:
-    CREATE FUNCTION identifier '(' opt_parameter_list ')' RETURNS data_type LIBRARY string_literal
-    {
-        $$ = new CreateFunctionStatement($3, $5, $7);
-    }
-;
-
-// ... other grammar rules ...
+/* ... existing code ... */

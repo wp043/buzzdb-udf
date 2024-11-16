@@ -1,4 +1,4 @@
-#include "catalog/udf_catalog_entry.h"
+#include "udf_catalog_entry.h"
 
 namespace buzzdb {
 namespace catalog {
