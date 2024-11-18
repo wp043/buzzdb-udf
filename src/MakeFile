@@ -1,0 +1,31 @@
+CXX = g++
+CXXFLAGS = -std=c++17 -I. -I./catalog -I./execution -I./parser -I./udf_examples
+
+SRCS = catalog/UDFCatalog.cpp \
+       execution/UDFExecutor.cpp \
+       main.cpp
+
+OBJS = $(SRCS:.cpp=.o) parser/Parser.o parser/Lexer.o
+
+all: buzzdb_udf
+
+buzzdb_udf: $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) -ldl
+
+parser/Parser.cpp parser/Parser.hpp: parser/Parser.y
+	bison -d -o parser/Parser.cpp parser/Parser.y
+
+parser/Lexer.cpp: parser/Lexer.l
+	flex -o parser/Lexer.cpp parser/Lexer.l
+
+parser/Parser.o: parser/Parser.cpp parser/Parser.hpp
+	$(CXX) $(CXXFLAGS) -c -o $@ parser/Parser.cpp
+
+parser/Lexer.o: parser/Lexer.cpp parser/Parser.hpp
+	$(CXX) $(CXXFLAGS) -c -o $@ parser/Lexer.cpp
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+clean:
+	rm -f buzzdb_udf $(OBJS) parser/Parser.cpp parser/Parser.hpp parser/Lexer.cpp

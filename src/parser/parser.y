@@ -1,18 +1,34 @@
-/* ... existing code ... */
+%token CREATE FUNCTION AS RETURNS
+%token IDENTIFIER STRING_LITERAL
 
-expression:
-    IDENTIFIER '(' argument_list ')'
-    {
-        // Create FunctionExpression
-        std::vector<std::unique_ptr<buzzdb::expression::AbstractExpression>> args = $3;
-        $$ = new buzzdb::expression::FunctionExpression($1, std::move(args));
-    }
-    | IDENTIFIER
-    {
-        // Assume it's a column reference
-        $$ = new buzzdb::expression::ColumnExpression($1);
-    }
-    | /* other expressions */
+%%
+
+statement:
+    create_function_statement
+    | select_statement
     ;
 
-/* ... existing code ... */
+create_function_statement:
+    CREATE FUNCTION IDENTIFIER AS STRING_LITERAL SYMBOL STRING_LITERAL RETURNS IDENTIFIER {
+        // Extract the information and register the UDF
+        UDFInfo udf_info;
+        udf_info.name = $3;
+        udf_info.library_path = $5;
+        udf_info.symbol_name = $7;
+        udf_info.return_type = $9;
+        UDFCatalog::getInstance().registerUDF(udf_info);
+    }
+    ;
+
+function_call:
+    IDENTIFIER '(' argument_list ')' {
+        // Handle function call, including UDFs
+    }
+    ;
+
+argument_list:
+    /* arguments parsing */
+    ;
+
+%%
+

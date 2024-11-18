@@ -1,0 +1,17 @@
+CXX = g++
+CXXFLAGS = -std=c++17 -I. -I../src -I../src/catalog -I../src/execution -I../src/udf_examples
+
+SRCS = UDFTests.cpp
+
+OBJS = $(SRCS:.cpp=.o)
+
+all: udf_tests
+
+udf_tests: $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) -ldl
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+clean:
+	rm -f udf_tests $(OBJS)

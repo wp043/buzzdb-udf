@@ -1,12 +1,12 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -shared -fPIC -I../include
+CXXFLAGS = -std=c++17 -fPIC -shared
 
-UDFS = my_sum_udf.so
+SRCS = sample_udf.cpp
 
-all: $(UDFS)
+all: libsample_udf.so
 
-%.so: %.cpp
-	$(CXX) $(CXXFLAGS) -o $@ $<
+libsample_udf.so: $(SRCS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
 clean:
-	rm -f $(UDFS)
+	rm -f libsample_udf.so

@@ -1,220 +1,174 @@
-# BuzzDB with User-Defined Functions (UDFs) Support
+# Implementing User-Defined Functions (UDFs) in BuzzDB
 
-Welcome to BuzzDB enhanced with User-Defined Functions (UDFs) support. This extension allows users to write custom functions in C++, register them with the database, and use them seamlessly within SQL queries.
-
-## Table of Contents
-
-- [Introduction](#introduction)
-- [Features](#features)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Building BuzzDB](#building-buzzdb)
-- [Developing UDFs](#developing-udfs)
-  - [Writing a UDF](#writing-a-udf)
-  - [Compiling a UDF](#compiling-a-udf)
-  - [Registering a UDF](#registering-a-udf)
-  - [Using a UDF in Queries](#using-a-udf-in-queries)
-- [Testing](#testing)
-- [Security Considerations](#security-considerations)
-- [Documentation](#documentation)
-- [License](#license)
-- [Acknowledgments](#acknowledgments)
+This repository contains the implementation of User-Defined Functions (UDFs) in BuzzDB, allowing users to create, register, and execute custom functions within their SQL queries.
 
 ## Introduction
 
-BuzzDB is a relational database management system developed in C++. This version of BuzzDB introduces support for User-Defined Functions (UDFs), enabling users to extend the database's functionality by writing custom functions that can be invoked within SQL queries.
+This project enhances BuzzDB by introducing support for scalar User-Defined Functions (UDFs) written in C++. Users can define custom functions, register them with BuzzDB, and use them within SQL queries as they would with built-in functions.
 
-## Features
+## File Structure
 
-- **UDF Registration**: Easily register and manage UDFs within the database.
-- **Seamless Integration**: Use UDFs in SQL queries just like built-in functions.
-- **C++ Implementation**: Write UDFs in C++ for high performance.
-- **Security Measures**: Sandbox environment to prevent unauthorized operations within UDFs.
-- **Extensive Documentation**: Guides and examples to help you develop and use UDFs effectively.
+```
+├── src
+│   ├── catalog
+│   │   ├── UDFCatalog.h
+│   │   └── UDFCatalog.cpp
+│   ├── execution
+│   │   ├── UDFExecutor.h
+│   │   └── UDFExecutor.cpp
+│   ├── parser
+│   │   ├── Parser.y
+│   │   └── Lexer.l
+│   ├── udf_examples
+│   │   ├── sample_udf.h
+│   │   ├── sample_udf.cpp
+│   │   └── MakeFile
+│   ├── main.cpp
+│   └── Makefile
+├── tests
+│   ├── UDFTests.cpp
+│   ├── TestUtils.h
+│   └── Makefile
+├── README.md
+└── Makefile
+```
 
-## Getting Started
+## Installation and Compilation
 
 ### Prerequisites
 
-- **Operating System**: Linux or macOS (Unix-like environments)
-- **Compiler**: GCC or Clang with C++11 support
-- **Build Tools**: Make
-- **Dependencies**:
-  - Standard C++ libraries
-  - POSIX libraries (for dynamic loading and threading)
-  - [Bison](https://www.gnu.org/software/bison/) and [Flex](https://github.com/westes/flex) (for parsing)
+- Compiler: C++17 compatible compiler (e.g., GCC 9.0+ or Clang 10.0+)
+- Build Tools: GNU Make
+- Parsing Tools: Flex and Bison
+- Dynamic Loading Library: dl (usually included with standard libraries)
+- Optional Libraries: Boost libraries (if needed for advanced features)
 
-### Building BuzzDB
+### Steps
 
-1. **Clone the Repository**:
+1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/jarulraj/buzzdb.git
-   cd buzzdb
+   git clone https://github.com/wp043/buzzdb-udf.git
+   cd buzzdb-udf
    ```
 
-2. **Set Up the Environment** (optional):
-
-   ```bash
-   ./scripts/setup_environment.sh
-   ```
-
-3. **Build the Database**:
-
-   ```bash
-   make clean
-   make
-   ```
-
-   This command will compile all the source files and generate the BuzzDB executable.
-
-## Developing UDFs
-
-### Writing a UDF
-
-1. **Create a New UDF Source File**:
-
-   Navigate to the `udf_examples/` directory:
-
-   ```bash
-   cd src/udf_examples/
-   ```
-
-   Create a new C++ file for your UDF, e.g., `my_custom_udf.cpp`.
-
-2. **Implement the `ExecuteUDF` Function**:
-
-   Your UDF must define an `extern "C"` function named `ExecuteUDF`:
-
-   ```cpp
-   #include "common/value.h"
-   #include <vector>
-
-   extern "C" buzzdb::common::Value ExecuteUDF(const std::vector<buzzdb::common::Value> &args) {
-       // Your custom logic here
-       // For example, return the product of integer arguments
-       int product = 1;
-       for (const auto &arg : args) {
-           product *= arg.GetAs<int>();
-       }
-       return buzzdb::common::Value(product);
-   }
-   ```
-
-3. **Handle Data Types**:
-
-   Use the `buzzdb::common::Value` class to work with different data types. Make sure to handle type conversions and check for null values as needed.
-
-### Compiling a UDF
-
-1. **Use the Provided Makefile**:
-
-   If you're in the `udf_examples/` directory, you can use the existing `Makefile`. Add your source file to the `Makefile`:
-
-   ```Makefile
-   UDFS = my_sum_udf.so my_custom_udf.so
-   ```
-
-2. **Compile the UDF**:
+2. **Compile BuzzDB with UDF Support**
 
    ```bash
    make
    ```
+   This will compile the source code in the `src` directory and produce the buzzdb_udf executable.
 
-   This command will compile your UDF source file into a shared library (e.g., `my_custom_udf.so`).
-
-3. **Alternatively, Use the Build Script**:
+3. **Compile Sample UDFs**
 
    ```bash
-   ../../scripts/build_udf.sh my_custom_udf.cpp
+   cd src/udf_examples
+   make
    ```
+   This will create a shared library `libsample_udf.so` that can be registered with BuzzDB.
+
+
+## Usage
+
+### Defining a UDF
+
+Users can define UDFs by creating C++ functions with a specific signature. Here's an example:
+
+**`sample_udf.h`**
+
+```cpp
+#ifndef SAMPLE_UDF_H
+#define SAMPLE_UDF_H
+
+extern "C" {
+    int add_integers(int a, int b);
+    double multiply_doubles(double x, double y);
+}
+
+#endif
+```
+
+**`sample_udf.cpp`**
+
+```cpp
+#include "sample_udf.h"
+
+extern "C" {
+
+int add_integers(int a, int b) {
+    return a + b;
+}
+
+double multiply_doubles(double x, double y) {
+    return x * y;
+}
+
+}
+```
+
+Compile the UDF into a shared library:
+
+```bash
+make
+```
+This will generate `libsample_udf.so in` the `src/udf_examples` directory.
+
 
 ### Registering a UDF
 
-1. **Start BuzzDB**:
+Use the `CREATE FUNCTION` statement in BuzzDB to register the UDF:
 
-   ```bash
-   ./buzzdb
-   ```
+```sql
+CREATE FUNCTION add_integers AS 'path/to/libsample_udf.so' SYMBOL 'add_integers' RETURNS INT;
 
-2. **Register the UDF with a SQL Command**:
+CREATE FUNCTION multiply_doubles AS 'path/to/libsample_udf.so' SYMBOL 'multiply_doubles' RETURNS DOUBLE;
+```
 
-   ```sql
-   CREATE FUNCTION my_custom_udf(INTEGER, INTEGER) RETURNS INTEGER LIBRARY '/path/to/my_custom_udf.so';
-   ```
-
-   Replace `/path/to/my_custom_udf.so` with the actual path to your compiled shared library.
+This command adds the UDF to BuzzDB's catalog, making it available for use in queries.
 
 ### Using a UDF in Queries
 
-Once registered, you can use your UDF in SQL queries:
+Once registered, you can use the UDF in your SQL queries:
 
 ```sql
-SELECT my_custom_udf(column1, column2) FROM my_table WHERE my_custom_udf(column3, column4) > 100;
+SELECT add_integers(column1, column2) FROM table_name;
+
+SELECT multiply_doubles(column3, 2.5) FROM table_name WHERE column4 > 100;
 ```
 
 ## Testing
 
-1. **Navigate to the Test Directory**:
+Unit tests are provided in the `tests` directory. To run the tests:
+
+1. **Compile the Test Suite**
 
    ```bash
-   cd test/
-   ```
-
-2. **Build and Run Tests**:
-
-   ```bash
-   make clean
+   cd tests
    make
-   ./udf_test
    ```
 
-   The tests will verify UDF registration, execution, and error handling.
+2. **Run the Tests**
 
-## Security Considerations
+   ```bash
+   ./udf_tests
+   ```
 
-- **Sandboxing**:
+The tests cover registration, execution, error handling, and security aspects of UDFs.
 
-  UDFs are executed in a sandboxed environment to prevent unauthorized operations. The sandbox restricts system calls that can be made within UDFs.
+## Future Work
 
-- **Best Practices**:
+- **Table-Valued UDFs:** Extend support to UDFs that return tables.
+- **Language Support Expansion:** Allow UDFs to be written in languages like Python or JavaScript.
+- **Enhanced Optimization:** Improve the query optimizer to better handle UDFs.
+- **Security Enhancements:** Implement code signing and more granular resource controls.
 
-  - Avoid performing file I/O, network operations, or other sensitive actions within UDFs.
-  - Handle exceptions and errors gracefully to prevent crashes.
-  - Validate input arguments within your UDF to ensure robustness.
+## License
 
-- **Resource Usage**:
+This project is licensed under the MIT License.
 
-  Be mindful of the resources your UDF consumes. Avoid excessive memory allocations and long-running computations that could degrade database performance.
+# Notes
 
-For more details, refer to the [Security Guidelines](docs/security_guidelines.md).
-
-## Documentation
-
-- **[UDF Development Guide](docs/udf_development_guide.md)**: Detailed instructions and examples for writing and using UDFs.
-- **[Security Guidelines](docs/security_guidelines.md)**: Information on the security model and best practices for UDF development.
-
-**Makefile**
----
-
-**Explanation of the Makefile**
-
-- **Variables**:
-  - `CXX`, `CXXFLAGS`: Compiler settings.
-  - `SRC_DIR`, `BUILD_DIR`, `BIN_DIR`, `TEST_DIR`, `UDF_EXAMPLES_DIR`: Directory paths.
-  - `SRC_FILES`, `OBJ_FILES`: Source and object files for the main database.
-  - `UDF_LIBS`: Shared library files for UDFs.
-  - `TEST_SRC_FILES`, `TEST_OBJ_FILES`, `TEST_TARGET`: Source and object files for tests.
-
-- **Targets**:
-  - `all`: Default target that builds the database executable and UDFs.
-  - `directories`: Ensures all necessary directories exist.
-  - `$(TARGET)`: Builds the main BuzzDB executable.
-  - `$(BUILD_DIR)/%.o`: Compiles source files to object files.
-  - `$(UDF_EXAMPLES_DIR)/%.so`: Compiles UDF source files into shared libraries.
-  - `test`: Builds and runs tests.
-  - `clean`: Removes build artifacts.
-
-- **Commands**:
-  - Uses pattern rules to simplify compilation steps.
-  - Includes necessary compiler flags and include paths.
+- **Security Considerations:** The implementation includes basic sandboxing using dynamic loading with `dlopen` and symbol resolution with `dlsym`. For enhanced security, consider integrating with security frameworks or sandboxing tools like Seccomp or SELinux.
+- **Error Handling:** The code includes basic error handling with `std::cerr`. For a production system, integrate with BuzzDB's logging and error management facilities.
+- **Thread Safety:** The current implementation does not account for thread safety in a multi-threaded environment. Synchronization mechanisms may be necessary.
+- **Type Handling:** The example assumes specific function signatures. A robust implementation should handle various data types and signatures dynamically.
