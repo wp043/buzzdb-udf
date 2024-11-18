@@ -10,7 +10,6 @@ statement:
 
 create_function_statement:
     CREATE FUNCTION IDENTIFIER AS STRING_LITERAL SYMBOL STRING_LITERAL RETURNS IDENTIFIER {
-        // Extract the information and register the UDF
         UDFInfo udf_info;
         udf_info.name = $3;
         udf_info.library_path = $5;
@@ -22,12 +21,10 @@ create_function_statement:
 
 function_call:
     IDENTIFIER '(' argument_list ')' {
-        // Handle function call, including UDFs
     }
     ;
 
 argument_list:
-    /* arguments parsing */
     ;
 
 %%

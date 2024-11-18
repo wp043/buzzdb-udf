@@ -67,93 +67,51 @@ This project enhances BuzzDB by introducing support for scalar User-Defined Func
    ```
    This will create a shared library `libsample_udf.so` that can be registered with BuzzDB.
 
+## Running the Application
 
-## Usage
-
-### Defining a UDF
-
-Users can define UDFs by creating C++ functions with a specific signature. Here's an example:
-
-**`sample_udf.h`**
-
-```cpp
-#ifndef SAMPLE_UDF_H
-#define SAMPLE_UDF_H
-
-extern "C" {
-    int add_integers(int a, int b);
-    double multiply_doubles(double x, double y);
-}
-
-#endif
-```
-
-**`sample_udf.cpp`**
-
-```cpp
-#include "sample_udf.h"
-
-extern "C" {
-
-int add_integers(int a, int b) {
-    return a + b;
-}
-
-double multiply_doubles(double x, double y) {
-    return x * y;
-}
-
-}
-```
-
-Compile the UDF into a shared library:
+After compiling, you can run the BuzzDB application with UDF support:
 
 ```bash
-make
-```
-This will generate `libsample_udf.so in` the `src/udf_examples` directory.
-
-
-### Registering a UDF
-
-Use the `CREATE FUNCTION` statement in BuzzDB to register the UDF:
-
-```sql
-CREATE FUNCTION add_integers AS 'path/to/libsample_udf.so' SYMBOL 'add_integers' RETURNS INT;
-
-CREATE FUNCTION multiply_doubles AS 'path/to/libsample_udf.so' SYMBOL 'multiply_doubles' RETURNS DOUBLE;
+./src/buzzdb_udf
 ```
 
-This command adds the UDF to BuzzDB's catalog, making it available for use in queries.
+You will see a prompt:
 
-### Using a UDF in Queries
-
-Once registered, you can use the UDF in your SQL queries:
-
-```sql
-SELECT add_integers(column1, column2) FROM table_name;
-
-SELECT multiply_doubles(column3, 2.5) FROM table_name WHERE column4 > 100;
+```
+Welcome to BuzzDB with UDF support!
+Enter SQL statements or 'exit' to quit.
+buzzdb>
 ```
 
-## Testing
+### Example Usage
 
-Unit tests are provided in the `tests` directory. To run the tests:
+1. **Register a UDF**
 
-1. **Compile the Test Suite**
+   At the `buzzdb>` prompt, enter:
 
-   ```bash
-   cd tests
-   make
+   ```sql
+   CREATE FUNCTION add_integers AS './src/udf_examples/libsample_udf.so' SYMBOL 'add_integers' RETURNS INT;
    ```
 
-2. **Run the Tests**
+   You should see:
 
-   ```bash
-   ./udf_tests
+   ```
+   UDF 'add_integers' registered successfully.
    ```
 
-The tests cover registration, execution, error handling, and security aspects of UDFs.
+2. **Use the UDF in a Query**
+
+   Since we don't have an actual database or tables implemented, we'll assume that the UDF execution is tested within the context of the application logic or via unit tests.
+
+## Testing UDF Execution
+
+In a full database implementation, you would use the UDF in SQL queries like:
+
+```sql
+SELECT add_integers(5, 10);
+```
+
+However, since this implementation focuses on UDF support, you can test UDF execution using the unit tests provided.
 
 ## Future Work
 

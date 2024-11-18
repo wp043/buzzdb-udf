@@ -34,7 +34,7 @@ WS          [ \t\r\n]+
 ","                 { return ','; }
 ";"                 { return ';'; }
 
-{WS}                { /* Skip whitespace */ }
+{WS}                { /* skip whitespace */ }
 
 .                   { return yytext[0]; }
 
